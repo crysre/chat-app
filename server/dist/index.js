@@ -9,19 +9,6 @@ wss.on("connection", (socket) => {
         type: "init",
         clientId: clientId,
     }));
-    //user will send
-    // join a room {
-    // "type": "join",
-    // "payload":{
-    //     "roomId": "123"
-    //             }
-    //     }
-    // send a message {
-    // "type": "chat",
-    // "payload":{
-    //     "message": "hi there"
-    //             }
-    //     }
     socket.on("message", (message) => {
         const parsedMessage = JSON.parse(message);
         if (parsedMessage.type === "join") {
@@ -56,13 +43,6 @@ wss.on("connection", (socket) => {
         }
     });
     console.log("user connected");
-    // socket.on("message", (message)=>{
-    //     console.log("message received " + message.toString());
-    //     // socket.send(message.toString() + ": sent from the server ")
-    //     allSocket.map((s)=>{
-    //         s.send(message.toString() + ": sent from the server ")
-    //     })
-    // })
     socket.on("disconnect", () => {
         allSocket = allSocket.filter((x) => x.socket != socket);
     });

@@ -102,15 +102,6 @@ function App() {
 
     wsRef.current = ws;
 
-    // ws.onopen = ()=>{
-    //   ws.send(JSON.stringify({
-    //     type:"join",
-    //     payload: {
-    //       roomId: "123",
-    //     }
-    //   }))
-    // }
-
     return () => {
       ws.close();
     };
