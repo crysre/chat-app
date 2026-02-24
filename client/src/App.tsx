@@ -8,17 +8,20 @@ interface ChatMessage {
 
 function App() {
   const [myId, setMyId] = useState();
-  const [info, setInfo] = useState<ChatMessage[]>([]);
   const [rooms, setRooms] = useState<Record<string, ChatMessage[]>>({});
+  const [currentRoom, setCurrentRoom] = useState<string>("1234");
 
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const roomInputRef = useRef<HTMLInputElement>(null);
   const wsRef = useRef<WebSocket>(null);
+  useEffect(() => {
+    console.log("Current room changed:", currentRoom);
+  }, [currentRoom]);
 
   function sendRoomId() {
     const roomId = roomInputRef.current?.value;
-    if (wsRef.current) {
+    if (wsRef.current && roomId) {
       wsRef.current.send(
         JSON.stringify({
           type: "join",
@@ -28,6 +31,8 @@ function App() {
           },
         }),
       );
+      setCurrentRoom(roomId);
+      console.log(currentRoom);
     }
     if (roomInputRef.current) {
       roomInputRef.current.value = "";
@@ -45,6 +50,7 @@ function App() {
           payload: {
             message: message,
             clientId: myId,
+            roomId: currentRoom,
           },
         }),
       );
@@ -56,12 +62,10 @@ function App() {
       inputRef.current.value = "";
     }
   }
-  useEffect(() => {
-    console.log("Updated info ", info);
-  }, [info]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  });
+  }, [rooms, currentRoom]);
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080");
@@ -78,7 +82,6 @@ function App() {
         }));
 
         console.log("hi, i'm data", data.payload.message);
-        console.log("fking info ", info);
       }
 
       if (data.type === "init") {
@@ -118,11 +121,11 @@ function App() {
       <div className=" w-full h-full bg-neutral-200 flex flex-col justify-between py-8 items-center rounded-xl">
         <p className="text-2xl">Welcome</p>
         <div className="flex flex-col overflow-y-scroll no-scrollbar  w-full h-full p-4 px-20">
-          {info.map((x) =>
+          {(rooms[currentRoom] || []).map((x, index) =>
             x.clientId === myId ? (
-              <ChatTile type="right" message={x.message} />
+              <ChatTile key={index} type="right" message={x.message} />
             ) : (
-              <ChatTile type="left" message={x.message} />
+              <ChatTile key={index} type="left" message={x.message} />
             ),
           )}
           <div ref={messagesEndRef} />
@@ -168,6 +171,9 @@ function App() {
           >
             Join
           </button>
+        </div>
+        <div className="bg-white text-gray-500 flex justify-center items-center w-50 rounded-md p-2 h-10">
+          Current Group: {currentRoom}
         </div>
       </div>
     </div>

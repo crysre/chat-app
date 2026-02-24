@@ -26,11 +26,17 @@ wss.on("connection", (socket) => {
         const parsedMessage = JSON.parse(message);
         if (parsedMessage.type === "join") {
             console.log("user joined " + parsedMessage.payload.roomId);
-            allSocket.push({
-                socket,
-                room: parsedMessage.payload.roomId,
-                clientId: parsedMessage.payload.clientId,
-            });
+            const existingUser = allSocket.find((x) => x.socket === socket);
+            if (existingUser) {
+                existingUser.room = parsedMessage.payload.roomId;
+            }
+            else {
+                allSocket.push({
+                    socket,
+                    room: parsedMessage.payload.roomId,
+                    clientId: parsedMessage.payload.clientId,
+                });
+            }
         }
         if (parsedMessage.type === "chat") {
             const currentUser = allSocket.find((x) => x.socket == socket);
